@@ -4,7 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import "gq/cmd"
+import "github.com/avinashsivaraman/gq/cmd"
 
 func main() {
 	cmd.Execute()
