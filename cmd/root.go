@@ -94,9 +94,6 @@ func readFromPipe(question string, reader io.Reader, writer io.Writer) error {
 * This function writes the result as output
  */
 func write(s string, w io.Writer) error {
-    colorReset := "\033[0m"
-    colorYellow := "\033[33m"
-    fmt.Println(colorYellow + "----------Answer----------" + colorReset)
     unquoted, err := strconv.Unquote(`"` + s + `"`)
 
     if err != nil {

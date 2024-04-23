@@ -23,8 +23,6 @@ func NewGeminiLLM() *GeminiLLM {
 
 func (self *GeminiLLM) Chat(userQuery string) (string, error) {
 
-	log.Printf("User Query: %v \n", userQuery)
-
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 
