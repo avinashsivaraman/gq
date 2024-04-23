@@ -1,34 +1,31 @@
 package llm
 
-import(
-  "context"
-  "encoding/json"
-  "os"
-  "log"
-  "errors"
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"log"
 
-  "github.com/google/generative-ai-go/genai"
-  "google.golang.org/api/option"
+	"github.com/google/generative-ai-go/genai"
+	"github.com/spf13/viper"
+	"google.golang.org/api/option"
 )
 
-
 type GeminiLLM struct {
-  chatMessage string
+	chatMessage string
 }
 
-
 func NewGeminiLLM() *GeminiLLM {
-  return &GeminiLLM{}
+	return &GeminiLLM{}
 }
 
 func (self *GeminiLLM) Chat(userQuery string) (string, error) {
-
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
-
+	apiKey := viper.GetString("api_key")
+	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
-	  log.Fatal(err)
-      return "", errors.New("Gemini API Initialized failed")
+		log.Fatal(err)
+		return "", errors.New("Gemini API Initialized failed")
 	}
 
 	defer client.Close()
@@ -39,10 +36,9 @@ func (self *GeminiLLM) Chat(userQuery string) (string, error) {
 	model.SetMaxOutputTokens(512)
 
 	resp, err := model.GenerateContent(ctx, genai.Text(userQuery))
-
 	if err != nil {
-	  log.Fatal(err)
-	  return "", err
+		log.Fatal(err)
+		return "", err
 	}
 
 	content := resp.Candidates[0].Content
