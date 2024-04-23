@@ -15,7 +15,7 @@ func init() {
 	// Set the config file name and file path
 	viper.SetConfigName(".gq")   // Specify the config file name without extension
 	viper.SetConfigType("yaml")  // Set the type of config file
-	viper.AddConfigPath("$HOME") // Add the root directory to search for the config file
+	viper.AddConfigPath("$HOME/.config/gq") // Add the root directory to search for the config file
 
 	// If needed, you can also set default config options here
 

@@ -132,7 +132,7 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolP("debug", "x", false, "debug mode")
-	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.gq.yaml)")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config/gq/.gq.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
