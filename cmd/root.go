@@ -4,13 +4,14 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bufio"
-	"fmt"
-	"io"
-	"os"
-	"strings"
-
-	"github.com/spf13/cobra"
+  // "bufio"
+  "strings"
+  "fmt"
+  "io"
+  "os"
+  "strconv"
+  "github.com/avinashsivaraman/gq/cmd/llm"
+  "github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -61,19 +62,31 @@ func isInputFromPipe() bool {
 * This function asks a question to the provider and returns the answer
  */
 func askQuestion(question string, data string) string {
-	return strings.ToUpper(question) + strings.ToUpper(data)
+  inputQuestion := question + " " + data
+  answer, err := makeGeminiCall(inputQuestion)
+ 
+
+  if err != nil {
+    fmt.Errorf("Chat call failed")
+  }
+  answerWithoutQuotes := strings.Trim(answer, `"`)
+  return answerWithoutQuotes
 }
 
 /**
 * This function reads the data from the pipe and asks questions and write it as output
  */
 func readFromPipe(question string, reader io.Reader, writer io.Writer) error {
-	fmt.Println(question)
-	scanner := bufio.NewScanner(bufio.NewReader(reader))
-	for scanner.Scan() {
-		result := askQuestion(question, scanner.Text())
-		write(result, writer)
-	}
+	// scanner := bufio.NewScanner(bufio.NewReader(reader))
+    inputBytes, err := io.ReadAll(reader)
+    
+    if err != nil{
+      fmt.Println(err)  
+    }
+
+    result := askQuestion(question, string(inputBytes))
+    write(result, writer)  
+
 	return nil
 }
 
@@ -81,12 +94,39 @@ func readFromPipe(question string, reader io.Reader, writer io.Writer) error {
 * This function writes the result as output
  */
 func write(s string, w io.Writer) error {
-	_, e := fmt.Fprintln(w, strings.ToUpper(s))
+    colorReset := "\033[0m"
+    colorYellow := "\033[33m"
+    fmt.Println(colorYellow + "----------Answer----------" + colorReset)
+    unquoted, err := strconv.Unquote(`"` + s + `"`)
+
+    if err != nil {
+      return err
+    }
+
+	_, e := fmt.Fprintln(w, unquoted)
+
 	if e != nil {
 		return e
 	}
 	return nil
 }
+
+/*
+* This function makes a call to Gemini API and retrieves the output
+*/
+func makeGeminiCall(question string) (string, error) {
+  geminiLLM := llm.NewGeminiLLM()
+   
+  chatResponse, err := geminiLLM.Chat(question)
+
+  if err != nil{
+    fmt.Errorf("Chat call failed")
+	return "", err
+  }
+
+  return chatResponse, nil
+}
+
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
