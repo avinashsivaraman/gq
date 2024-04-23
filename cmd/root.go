@@ -4,14 +4,15 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-  // "bufio"
-  "strings"
-  "fmt"
-  "io"
-  "os"
-  "strconv"
-  "github.com/avinashsivaraman/gq/cmd/llm"
-  "github.com/spf13/cobra"
+	// "bufio"
+	"fmt"
+	"io"
+	"os"
+	"strconv"
+	"strings"
+
+	"github.com/avinashsivaraman/gq/cmd/llm"
+	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -62,15 +63,13 @@ func isInputFromPipe() bool {
 * This function asks a question to the provider and returns the answer
  */
 func askQuestion(question string, data string) string {
-  inputQuestion := question + " " + data
-  answer, err := makeGeminiCall(inputQuestion)
- 
-
-  if err != nil {
-    fmt.Errorf("Chat call failed")
-  }
-  answerWithoutQuotes := strings.Trim(answer, `"`)
-  return answerWithoutQuotes
+	inputQuestion := question + " " + data
+	answer, err := makeGeminiCall(inputQuestion)
+	if err != nil {
+		fmt.Errorf("Chat call failed")
+	}
+	answerWithoutQuotes := strings.Trim(answer, `"`)
+	return answerWithoutQuotes
 }
 
 /**
@@ -78,14 +77,13 @@ func askQuestion(question string, data string) string {
  */
 func readFromPipe(question string, reader io.Reader, writer io.Writer) error {
 	// scanner := bufio.NewScanner(bufio.NewReader(reader))
-    inputBytes, err := io.ReadAll(reader)
-    
-    if err != nil{
-      fmt.Println(err)  
-    }
+	inputBytes, err := io.ReadAll(reader)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-    result := askQuestion(question, string(inputBytes))
-    write(result, writer)  
+	result := askQuestion(question, string(inputBytes))
+	write(result, writer)
 
 	return nil
 }
@@ -94,11 +92,10 @@ func readFromPipe(question string, reader io.Reader, writer io.Writer) error {
 * This function writes the result as output
  */
 func write(s string, w io.Writer) error {
-    unquoted, err := strconv.Unquote(`"` + s + `"`)
-
-    if err != nil {
-      return err
-    }
+	unquoted, err := strconv.Unquote(`"` + s + `"`)
+	if err != nil {
+		return err
+	}
 
 	_, e := fmt.Fprintln(w, unquoted)
 
@@ -110,20 +107,18 @@ func write(s string, w io.Writer) error {
 
 /*
 * This function makes a call to Gemini API and retrieves the output
-*/
+ */
 func makeGeminiCall(question string) (string, error) {
-  geminiLLM := llm.NewGeminiLLM()
-   
-  chatResponse, err := geminiLLM.Chat(question)
+	geminiLLM := llm.NewGeminiLLM()
 
-  if err != nil{
-    fmt.Errorf("Chat call failed")
-	return "", err
-  }
+	chatResponse, err := geminiLLM.Chat(question)
+	if err != nil {
+		fmt.Errorf("Chat call failed")
+		return "", err
+	}
 
-  return chatResponse, nil
+	return chatResponse, nil
 }
-
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
