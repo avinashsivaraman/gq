@@ -21,7 +21,7 @@ Simple CLI to ask questions
 ## Providing An API Key
 
 ```
-> touch ~/.gq.yaml
+> touch ~/.config/gq/.gq.yaml
 ```
 
 Provide the below api_key in the file
