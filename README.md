@@ -1,30 +1,48 @@
 # gq
-Simple CLI to ask questions
 
+GQ: Generative (AI) Query
 
-## Building the project
+Simple CLI tool to ask questions using LLMs (Large Language Models).
 
-```
-> go build
-```
-
-## Running the project
+## Installation
 
 ```
-> ./gq
-
-> ./gq "Seattle" -q "What is the weather like today?"
-
-> echo "Seattle" | ./gq -q "What is the weather like today?"
+chmod +x ./install.sh
+./install.sh
 ```
 
-## Providing An API Key
+## Usage
+
+Run `gq` followed by your question.
+
+Examples:
 
 ```
-> touch ~/.config/gq/.gq.yaml
+gq "What is the capital of France?"
+gq "France" -q "What is the capital of this Country?"
+gq -q "What is the capital of France?"
+cat test_file.txt | gq -q "Explain this to me" 
 ```
 
-Provide the below api_key in the file
+## API Key
+
+To use a specific LLM model, create a `.gq.yaml` file in your $HOME/.config/gq/ directory and provide the API key and model specifications.
+
+`touch ~/.config/gq/.gq.yaml`
+
+```yaml
+gemini:
+  apiKey: <API_KEY>
+  modelName: gemini-1.0-pro
+  temperature: 0.7
+  maxOutputTokens: 1024
 ```
-api_key: a28f29de-be82-4d03-afd3-a94f36414a7d
-```
+
+## Supported Models
+
+- Gemini
+
+## Future Plans
+
+- Support for OpenAI models
+- Support for Ollama

@@ -22,7 +22,14 @@ func NewGeminiLLM() *GeminiLLM {
 
 func (self *GeminiLLM) Chat(userQuery string, verbose bool) (string, error) {
 	ctx := context.Background()
-	apiKey := viper.GetString("api_key")
+
+    geminiConfig := viper.Sub("gemini")
+
+	apiKey := geminiConfig.GetString("apiKey")
+    modelName := geminiConfig.GetString("modelName")
+    temperature := float32(geminiConfig.GetFloat64("temperature"))
+    maxOutputTokens := geminiConfig.GetInt32("maxOutputTokens")
+
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		log.Fatal(err)
@@ -30,10 +37,6 @@ func (self *GeminiLLM) Chat(userQuery string, verbose bool) (string, error) {
 	}
 
 	defer client.Close()
-
-    modelName := "gemini-1.0-pro"
-    var temperature float32 = 0.7
-    var maxOutputTokens int32 = 512
 
     if verbose {
       fmt.Println("\033[33mModel Params:\033[0m")
