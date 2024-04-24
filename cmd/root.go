@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
 	Use:   "gq",
 	Short: "A CLI to leverage Generative AI for your query",
     Long: `
-  GQ (Generative Query) is a command-line tool for asking questions using AI models like Gemini.
+  GQ (Generative AI Query) is a command-line tool for asking questions using AI models like Gemini.
   It's as easy as typing your question in the terminal or piping data for more complex queries.
 
   Usage examples:
