@@ -41,7 +41,28 @@ func runCommand(cmd *cobra.Command, args []string) error {
     verbose, _ := cmd.Flags().GetBool("verbose")
     
     if len(args) == 0 && question == "" {
-      return cmd.Help()  
+      var asciiArt string = `
+
+     ░▒▓██████▓▒░   ░▒▓██████▓▒░
+    ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
+    ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░
+    ░▒▓█▓▒▒▓███▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
+    ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
+    ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
+     ░▒▓██████▓▒░   ░▒▓██████▓▒░
+                      ░▒▓█▓▒░
+                       ░▒▓██▓▒░
+
+`
+    shortDescription := `
+    A CLI to leverage LLMs for your query.
+    Use gq --help for more details
+    `
+
+    fmt.Println("\033[38;5;148m" + asciiArt + "\033[0m")
+    fmt.Println()
+    fmt.Println("\033[38;5;148m" + shortDescription + "\033[0m")
+    return nil
     }
 
     var cmdArgs string = ""
