@@ -1,3 +1,6 @@
+echo "Performing go mod tidy"
+go mod tidy
+
 echo "Installing gq"
 go build
 
