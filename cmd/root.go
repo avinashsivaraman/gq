@@ -48,7 +48,7 @@ func runCommand(cmd *cobra.Command, args []string) error {
     
 	if isInputFromPipe() {
       if question == "" {
-        return fmt.Errorf("no question provided. Provide -q when performing Pipe operations")
+        return fmt.Errorf("\033[31mno question provided. Provide -q when performing Pipe operations\033[0m")
       }
 
       cmdArgs = readFromPipe(os.Stdin)
