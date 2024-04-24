@@ -1,12 +1,8 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package main
 
 import (
 	"fmt"
 	"os"
-
 	"github.com/avinashsivaraman/gq/cmd"
 	"github.com/spf13/viper"
 )
@@ -16,8 +12,6 @@ func init() {
 	viper.SetConfigName(".gq")   // Specify the config file name without extension
 	viper.SetConfigType("yaml")  // Set the type of config file
 	viper.AddConfigPath("$HOME/.config/gq") // Add the root directory to search for the config file
-
-	// If needed, you can also set default config options here
 
 	// Read the config file
 	err := viper.ReadInConfig()

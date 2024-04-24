@@ -1,10 +1,6 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
-	// "bufio"
 	"fmt"
 	"io"
 	"os"
@@ -18,12 +14,19 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "gq",
-	Short: "A CLI to ask questions about the data",
-	Long: `This CLI is used to ask questions about the data you send to it. 
-  It will read the data from stdin or pipe and ask questions from the user. 
-  The output will be written to stdout.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
+	Short: "A CLI to leverage Generative AI for your query",
+    Long: `
+  GQ (Generative Query) is a command-line tool for asking questions using AI models like Gemini.
+  It's as easy as typing your question in the terminal or piping data for more complex queries.
+
+  Usage examples:
+    - Ask a question from the terminal:
+        gq "What state is Seattle in?"
+
+    - Process complex queries with piping:
+        cat file.txt | gq -q "Explain this file to me"
+    
+    `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runCommand(cmd, args)
 	},
@@ -35,18 +38,24 @@ var rootCmd = &cobra.Command{
 func runCommand(cmd *cobra.Command, args []string) error {
 	question, _ := cmd.Flags().GetString("question")
 
-	if question == "" {
-		return fmt.Errorf("no question provided")
-	}
+    if len(args) == 0 && question == "" {
+      return cmd.Help()  
+    }
 
 	if isInputFromPipe() {
-		readFromPipe(question, os.Stdin, os.Stdout)
-	} else {
-		if len(args) == 0 {
-			return fmt.Errorf("no data provided")
-		}
-		result := askQuestion(question, args[0])
-		write(result, os.Stdout)
+      if question == "" {
+        return fmt.Errorf("no question provided. Provide -q when performing Pipe operations")
+      }
+
+      readFromPipe(question, os.Stdin, os.Stdout)
+	
+    } else {
+      cmdArgs := ""
+      if len(args) != 0 {
+        cmdArgs = args[0]
+      }
+      result := askQuestion(question, cmdArgs)
+      write(result, os.Stdout)
 	}
 	return nil
 }
@@ -56,7 +65,7 @@ func runCommand(cmd *cobra.Command, args []string) error {
  */
 func isInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
-	return fileInfo.Mode()&os.ModeCharDevice == 0
+	return (fileInfo.Mode() & os.ModeCharDevice) == 0
 }
 
 /**
@@ -66,17 +75,15 @@ func askQuestion(question string, data string) string {
 	inputQuestion := question + " " + data
 	answer, err := makeGeminiCall(inputQuestion)
 	if err != nil {
-		fmt.Errorf("Chat call failed")
+      fmt.Errorf("Chat call failed")
 	}
-	answerWithoutQuotes := strings.Trim(answer, `"`)
-	return answerWithoutQuotes
+	return strings.Trim(answer, `"`)
 }
 
 /**
 * This function reads the data from the pipe and asks questions and write it as output
  */
 func readFromPipe(question string, reader io.Reader, writer io.Writer) error {
-	// scanner := bufio.NewScanner(bufio.NewReader(reader))
 	inputBytes, err := io.ReadAll(reader)
 	if err != nil {
 		fmt.Println(err)
@@ -105,7 +112,7 @@ func write(s string, w io.Writer) error {
 	return nil
 }
 
-/*
+/**
 * This function makes a call to Gemini API and retrieves the output
  */
 func makeGeminiCall(question string) (string, error) {
@@ -131,11 +138,6 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().BoolP("debug", "x", false, "debug mode")
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config/gq/.gq.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.Flags().StringP("question", "q", "", "Question about the data sent")
 }
