@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
+    "fmt"
 	"io"
 	"os"
 	"strconv"
@@ -37,26 +38,34 @@ var rootCmd = &cobra.Command{
  */
 func runCommand(cmd *cobra.Command, args []string) error {
 	question, _ := cmd.Flags().GetString("question")
-
+    verbose, _ := cmd.Flags().GetBool("verbose")
+    
     if len(args) == 0 && question == "" {
       return cmd.Help()  
     }
 
+    var cmdArgs string = ""
+    
 	if isInputFromPipe() {
       if question == "" {
         return fmt.Errorf("no question provided. Provide -q when performing Pipe operations")
       }
 
-      readFromPipe(question, os.Stdin, os.Stdout)
+      cmdArgs = readFromPipe(os.Stdin)
+
+      if verbose {
+        fmt.Println("\033[33mReading from Pipe with contents: \033[0m")
+        fmt.Println("\033[36m" + cmdArgs + "\033[0m")
+      }
 	
     } else {
-      cmdArgs := ""
       if len(args) != 0 {
         cmdArgs = args[0]
       }
-      result := askQuestion(question, cmdArgs)
-      write(result, os.Stdout)
 	}
+
+    result := askQuestion(question, cmdArgs, verbose)
+    write(result, os.Stdout, verbose)
 	return nil
 }
 
@@ -71,11 +80,23 @@ func isInputFromPipe() bool {
 /**
 * This function asks a question to the provider and returns the answer
  */
-func askQuestion(question string, data string) string {
-	inputQuestion := question + " " + data
-	answer, err := makeGeminiCall(inputQuestion)
+func askQuestion(question string, data string, verbose bool) string {
+    
+    var extraMiddleCharacter string = "\n"
+    if question == "" {
+      extraMiddleCharacter = ""
+    }
+      
+	inputQuestion := question + extraMiddleCharacter + data
+    
+    if verbose {
+      fmt.Println("\033[33mMaking LLM Call with question: \033[0m")
+      fmt.Println("\033[36m" + inputQuestion + "\033[0m")
+    }
+
+	answer, err := makeGeminiCall(inputQuestion, verbose)
 	if err != nil {
-      fmt.Errorf("Chat call failed")
+      log.Fatal(err)
 	}
 	return strings.Trim(answer, `"`)
 }
@@ -83,31 +104,33 @@ func askQuestion(question string, data string) string {
 /**
 * This function reads the data from the pipe and asks questions and write it as output
  */
-func readFromPipe(question string, reader io.Reader, writer io.Writer) error {
+func readFromPipe(reader io.Reader) string {
 	inputBytes, err := io.ReadAll(reader)
 	if err != nil {
-		fmt.Println(err)
+      log.Fatal(err)
 	}
-
-	result := askQuestion(question, string(inputBytes))
-	write(result, writer)
-
-	return nil
+    
+    return string(inputBytes)
 }
 
 /**
 * This function writes the result as output
  */
-func write(s string, w io.Writer) error {
+func write(s string, w io.Writer, verbose bool) error {
 	unquoted, err := strconv.Unquote(`"` + s + `"`)
 	if err != nil {
-		return err
+      log.Fatal(err)
+      return err
 	}
 
+    if verbose {
+      fmt.Println("\033[32m---LLM Output---\033[0m")
+    }
 	_, e := fmt.Fprintln(w, unquoted)
 
 	if e != nil {
-		return e
+      log.Fatal(err)
+      return e
 	}
 	return nil
 }
@@ -115,13 +138,13 @@ func write(s string, w io.Writer) error {
 /**
 * This function makes a call to Gemini API and retrieves the output
  */
-func makeGeminiCall(question string) (string, error) {
+func makeGeminiCall(question string, verbose bool) (string, error) {
 	geminiLLM := llm.NewGeminiLLM()
 
-	chatResponse, err := geminiLLM.Chat(question)
+	chatResponse, err := geminiLLM.Chat(question, verbose)
 	if err != nil {
-		fmt.Errorf("Chat call failed")
-		return "", err
+	  log.Fatal(err)
+      return "", err
 	}
 
 	return chatResponse, nil
@@ -132,7 +155,8 @@ func makeGeminiCall(question string) (string, error) {
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		os.Exit(1)
+      log.Fatal(err)
+      os.Exit(1)
 	}
 }
 

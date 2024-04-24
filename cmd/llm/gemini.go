@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/google/generative-ai-go/genai"
@@ -19,7 +20,7 @@ func NewGeminiLLM() *GeminiLLM {
 	return &GeminiLLM{}
 }
 
-func (self *GeminiLLM) Chat(userQuery string) (string, error) {
+func (self *GeminiLLM) Chat(userQuery string, verbose bool) (string, error) {
 	ctx := context.Background()
 	apiKey := viper.GetString("api_key")
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
@@ -30,10 +31,22 @@ func (self *GeminiLLM) Chat(userQuery string) (string, error) {
 
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+    modelName := "gemini-1.0-pro"
+    var temperature float32 = 0.7
+    var maxOutputTokens int32 = 512
 
-	model.SetTemperature(0.7)
-	model.SetMaxOutputTokens(512)
+    if verbose {
+      fmt.Println("\033[33mModel Params:\033[0m")
+      fmt.Println("\033[36mModel Name: ", modelName)
+      fmt.Println("Temperature: ", temperature)
+      fmt.Println("Max Output Tokens: ", maxOutputTokens)
+      fmt.Println("\033[0m")
+    }
+
+	model := client.GenerativeModel(modelName)
+
+	model.SetTemperature(temperature)
+	model.SetMaxOutputTokens(maxOutputTokens)
 
 	resp, err := model.GenerateContent(ctx, genai.Text(userQuery))
 	if err != nil {
