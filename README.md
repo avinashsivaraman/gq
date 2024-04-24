@@ -1,5 +1,7 @@
 # gq
 
+GQ: Generative (AI) Query
+
 Simple CLI tool to ask questions using LLMs (Large Language Models).
 
 ## Installation
@@ -24,14 +26,16 @@ cat test_file.txt | gq -q "Explain this to me"
 
 ## API Key
 
-To use a specific LLM model, create a `.gq.yaml` file in your home directory and provide the API key and model specifications.
+To use a specific LLM model, create a `.gq.yaml` file in your $HOME/.config/gq/ directory and provide the API key and model specifications.
+
+`touch ~/.config/gq/.gq.yaml`
 
 ```yaml
 gemini:
   apiKey: <API_KEY>
   modelName: gemini-1.0-pro
   temperature: 0.7
-  maxOutputTokens: 256
+  maxOutputTokens: 1024
 ```
 
 ## Supported Models
