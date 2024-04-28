@@ -1,16 +1,21 @@
 package cmd
 
 import (
-	"log"
-    "fmt"
+	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/avinashsivaraman/gq/cmd/llm"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+type ChatProvider interface {
+	Chat(string, bool) (string, error)
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -39,6 +44,7 @@ var rootCmd = &cobra.Command{
 func runCommand(cmd *cobra.Command, args []string) error {
 	question, _ := cmd.Flags().GetString("question")
     verbose, _ := cmd.Flags().GetBool("verbose")
+    provider, _ := cmd.Flags().GetString("provider")
     
     if len(args) == 0 && question == "" {
       var asciiArt string = `
@@ -85,7 +91,7 @@ func runCommand(cmd *cobra.Command, args []string) error {
       }
 	}
 
-    result := askQuestion(question, cmdArgs, verbose)
+    result := askQuestion(question, cmdArgs, provider, verbose)
     write(result, os.Stdout, verbose)
 	return nil
 }
@@ -101,7 +107,7 @@ func isInputFromPipe() bool {
 /**
 * This function asks a question to the provider and returns the answer
  */
-func askQuestion(question string, data string, verbose bool) string {
+func askQuestion(question string, data string, provider string, verbose bool) string {
     
     var extraMiddleCharacter string = "\n"
     if question == "" {
@@ -115,7 +121,25 @@ func askQuestion(question string, data string, verbose bool) string {
       fmt.Println("\033[36m" + inputQuestion + "\033[0m")
     }
 
-	answer, err := makeGeminiCall(inputQuestion, verbose)
+    if provider == "" {
+      provider = viper.GetString("default")
+      if verbose {
+      fmt.Println("\033[33mChatProvider not specified. Using default provider: \033[0m")
+      }
+    } else {
+      if verbose {
+        fmt.Println("\033[33mUsing Chat Provider: \033[0m")
+      }
+    }
+   
+    if verbose {
+      fmt.Println("\033[36m" + provider)
+      fmt.Println("\033[0m")
+    }
+    chatProvider := getChatProvider(provider)
+    
+
+	answer, err := chatProvider.Chat(inputQuestion, verbose)
 	if err != nil {
       log.Fatal(err)
 	}
@@ -156,20 +180,20 @@ func write(s string, w io.Writer, verbose bool) error {
 	return nil
 }
 
-/**
-* This function makes a call to Gemini API and retrieves the output
- */
-func makeGeminiCall(question string, verbose bool) (string, error) {
-	geminiLLM := llm.NewGeminiLLM()
 
-	chatResponse, err := geminiLLM.Chat(question, verbose)
-	if err != nil {
-	  log.Fatal(err)
-      return "", err
+func getChatProvider(provider string) ChatProvider {
+  switch provider {
+	case "gemini":
+		return llm.GeminiProvider{}
+	case "openAI":
+		return llm.OpenAIProvider{}
+    case "azureOpenAI":
+      return llm.AzureOpenAIProvider{}
+	default:
+		panic("Unknown provider")
 	}
-
-	return chatResponse, nil
 }
+
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -183,6 +207,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
+    rootCmd.PersistentFlags().StringP("provider", "p", "", "the llm provider to use")
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config/gq/.gq.yaml)")
 	rootCmd.Flags().StringP("question", "q", "", "Question about the data sent")
 }

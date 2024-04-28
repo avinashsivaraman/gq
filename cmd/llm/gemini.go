@@ -12,15 +12,10 @@ import (
 	"google.golang.org/api/option"
 )
 
-type GeminiLLM struct {
-	chatMessage string
-}
 
-func NewGeminiLLM() *GeminiLLM {
-	return &GeminiLLM{}
-}
+type GeminiProvider struct{}
 
-func (self *GeminiLLM) Chat(userQuery string, verbose bool) (string, error) {
+func (_ GeminiProvider) Chat(userQuery string, verbose bool) (string, error) {
 	ctx := context.Background()
 
     geminiConfig := viper.Sub("gemini")
