@@ -3,7 +3,10 @@ module github.com/avinashsivaraman/gq
 go 1.22
 
 require (
+	github.com/Azure/azure-sdk-for-go/sdk/ai/azopenai v0.5.1
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.11.1
 	github.com/google/generative-ai-go v0.11.0
+	github.com/sashabaranov/go-openai v1.23.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	google.golang.org/api v0.172.0
@@ -15,6 +18,7 @@ require (
 	cloud.google.com/go/compute v1.24.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.5.6 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
