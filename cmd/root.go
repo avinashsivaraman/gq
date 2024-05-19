@@ -21,7 +21,7 @@ type ChatProvider interface {
 var rootCmd = &cobra.Command{
 	Use:   "gq",
 	Short: "A CLI to leverage Generative AI for your query",
-    Long: `
+	Long: `
   GQ (Generative AI Query) is a command-line tool for asking questions using AI models like Gemini.
   It's as easy as typing your question in the terminal or piping data for more complex queries.
 
@@ -43,11 +43,11 @@ var rootCmd = &cobra.Command{
  */
 func runCommand(cmd *cobra.Command, args []string) error {
 	question, _ := cmd.Flags().GetString("question")
-    verbose, _ := cmd.Flags().GetBool("verbose")
-    provider, _ := cmd.Flags().GetString("provider")
-    
-    if len(args) == 0 && question == "" {
-      var asciiArt string = `
+	verbose, _ := cmd.Flags().GetBool("verbose")
+	provider, _ := cmd.Flags().GetString("provider")
+
+	if len(args) == 0 && question == "" {
+		var asciiArt string = `
 
      ░▒▓██████▓▒░   ░▒▓██████▓▒░
     ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
@@ -60,39 +60,39 @@ func runCommand(cmd *cobra.Command, args []string) error {
                        ░▒▓██▓▒░
 
 `
-    shortDescription := `
+		shortDescription := `
     A CLI to leverage LLMs for your query.
     Use gq --help for more details
     `
 
-    fmt.Println("\033[38;5;148m" + asciiArt + "\033[0m")
-    fmt.Println()
-    fmt.Println("\033[38;5;148m" + shortDescription + "\033[0m")
-    return nil
-    }
-
-    var cmdArgs string = ""
-    
-	if isInputFromPipe() {
-      if question == "" {
-        return fmt.Errorf("\033[31mno question provided. Provide -q when performing Pipe operations\033[0m")
-      }
-
-      cmdArgs = readFromPipe(os.Stdin)
-
-      if verbose {
-        fmt.Println("\033[33mReading from Pipe with contents: \033[0m")
-        fmt.Println("\033[36m" + cmdArgs + "\033[0m")
-      }
-	
-    } else {
-      if len(args) != 0 {
-        cmdArgs = args[0]
-      }
+		fmt.Println("\033[38;5;148m" + asciiArt + "\033[0m")
+		fmt.Println()
+		fmt.Println("\033[38;5;148m" + shortDescription + "\033[0m")
+		return nil
 	}
 
-    result := askQuestion(question, cmdArgs, provider, verbose)
-    write(result, os.Stdout, verbose)
+	var cmdArgs string = ""
+
+	if isInputFromPipe() {
+		if question == "" {
+			return fmt.Errorf("\033[31mno question provided. Provide -q when performing Pipe operations\033[0m")
+		}
+
+		cmdArgs = readFromPipe(os.Stdin)
+
+		if verbose {
+			fmt.Println("\033[33mReading from Pipe with contents: \033[0m")
+			fmt.Println("\033[36m" + cmdArgs + "\033[0m")
+		}
+
+	} else {
+		if len(args) != 0 {
+			cmdArgs = args[0]
+		}
+	}
+
+	result := askQuestion(question, cmdArgs, provider, verbose)
+	write(result, os.Stdout, verbose)
 	return nil
 }
 
@@ -108,40 +108,38 @@ func isInputFromPipe() bool {
 * This function asks a question to the provider and returns the answer
  */
 func askQuestion(question string, data string, provider string, verbose bool) string {
-    
-    var extraMiddleCharacter string = "\n"
-    if question == "" {
-      extraMiddleCharacter = ""
-    }
-      
-	inputQuestion := question + extraMiddleCharacter + data
-    
-    if verbose {
-      fmt.Println("\033[33mMaking LLM Call with question: \033[0m")
-      fmt.Println("\033[36m" + inputQuestion + "\033[0m")
-    }
+	var extraMiddleCharacter string = "\n"
+	if question == "" {
+		extraMiddleCharacter = ""
+	}
 
-    if provider == "" {
-      provider = viper.GetString("default")
-      if verbose {
-      fmt.Println("\033[33mChatProvider not specified. Using default provider: \033[0m")
-      }
-    } else {
-      if verbose {
-        fmt.Println("\033[33mUsing Chat Provider: \033[0m")
-      }
-    }
-   
-    if verbose {
-      fmt.Println("\033[36m" + provider)
-      fmt.Println("\033[0m")
-    }
-    chatProvider := getChatProvider(provider)
-    
+	inputQuestion := question + extraMiddleCharacter + data
+
+	if verbose {
+		fmt.Println("\033[33mMaking LLM Call with question: \033[0m")
+		fmt.Println("\033[36m" + inputQuestion + "\033[0m")
+	}
+
+	if provider == "" {
+		provider = viper.GetString("default")
+		if verbose {
+			fmt.Println("\033[33mChatProvider not specified. Using default provider: \033[0m")
+		}
+	} else {
+		if verbose {
+			fmt.Println("\033[33mUsing Chat Provider: \033[0m")
+		}
+	}
+
+	if verbose {
+		fmt.Println("\033[36m" + provider)
+		fmt.Println("\033[0m")
+	}
+	chatProvider := getChatProvider(provider)
 
 	answer, err := chatProvider.Chat(inputQuestion, verbose)
 	if err != nil {
-      log.Fatal(err)
+		log.Fatal(err)
 	}
 	return strings.Trim(answer, `"`)
 }
@@ -152,10 +150,10 @@ func askQuestion(question string, data string, provider string, verbose bool) st
 func readFromPipe(reader io.Reader) string {
 	inputBytes, err := io.ReadAll(reader)
 	if err != nil {
-      log.Fatal(err)
+		log.Fatal(err)
 	}
-    
-    return string(inputBytes)
+
+	return string(inputBytes)
 }
 
 /**
@@ -164,50 +162,50 @@ func readFromPipe(reader io.Reader) string {
 func write(s string, w io.Writer, verbose bool) error {
 	unquoted, err := strconv.Unquote(`"` + s + `"`)
 	if err != nil {
-      log.Fatal(err)
-      return err
+		log.Fatal(err)
+		return err
 	}
 
-    if verbose {
-      fmt.Println("\033[32m---LLM Output---\033[0m")
-    }
+	if verbose {
+		fmt.Println("\033[32m---LLM Output---\033[0m")
+	}
 	_, e := fmt.Fprintln(w, unquoted)
 
 	if e != nil {
-      log.Fatal(err)
-      return e
+		log.Fatal(err)
+		return e
 	}
 	return nil
 }
 
-
 func getChatProvider(provider string) ChatProvider {
-  switch provider {
+	switch provider {
 	case "gemini":
 		return llm.GeminiProvider{}
 	case "openAI":
 		return llm.OpenAIProvider{}
-    case "azureOpenAI":
-      return llm.AzureOpenAIProvider{}
+	case "azureOpenAI":
+		return llm.AzureOpenAIProvider{}
+	case "bedrock":
+		return llm.AmznBedrockAIProvider{}
 	default:
 		panic("Unknown provider")
 	}
 }
-
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-      log.Fatal(err)
-      os.Exit(1)
+		log.Fatal(err)
+		os.Exit(1)
 	}
 }
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
-    rootCmd.PersistentFlags().StringP("provider", "p", "", "the llm provider to use")
+	rootCmd.PersistentFlags().StringP("provider", "p", "", "the llm provider to use")
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config/gq/.gq.yaml)")
 	rootCmd.Flags().StringP("question", "q", "", "Question about the data sent")
 }

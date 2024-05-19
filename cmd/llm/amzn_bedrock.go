@@ -13,11 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Request structure for the model input
-type ModelRequest struct {
-	InputText string `json:"inputText"`
-}
-
 const (
 	CLAUDE_MODEL_ID             = "anthropic.claude-v2"
 	JURASSIC2_MODEL_ID          = "ai21.j2-mid-v1"
