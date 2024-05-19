@@ -24,9 +24,9 @@ const (
 type AmznBedrockAIProvider struct{}
 
 func (_ AmznBedrockAIProvider) Chat(userQuery string, verbose bool) (string, error) {
-	amznBedrock := viper.Sub("amazonBedrock")
+	amznBedrock := viper.Sub("bedrock")
 
-	modelID := amznBedrock.GetString("modelID")
+	modelName := amznBedrock.GetString("modelName")
 	awsProfile := amznBedrock.GetString("awsProfile")
 	awsRegion := amznBedrock.GetString("awsRegion")
 
@@ -41,19 +41,19 @@ func (_ AmznBedrockAIProvider) Chat(userQuery string, verbose bool) (string, err
 	client := bedrockruntime.NewFromConfig(cfg)
 	wrapper := InvokeModelWrapper{BedrockRuntimeClient: client}
 
-	switch modelID {
-	case "claude":
+	switch modelName {
+	case CLAUDE_MODEL_ID:
 		return wrapper.InvokeClaude(userQuery)
-	case "jurassic2":
+	case JURASSIC2_MODEL_ID:
 		return wrapper.InvokeJurassic2(userQuery)
-	case "llama2":
+	case LLAMA2_MODEL_ID:
 		return wrapper.InvokeLlama2(userQuery)
-	case "titan-image":
+	case TITAN_IMAGE_MODEL_ID:
 		return wrapper.InvokeTitanImage(userQuery, 0)
-	case "titan-text":
+	case TITAN_TEXT_EXPRESS_MODEL_ID:
 		return wrapper.InvokeTitanText(userQuery)
 	default:
-		return "", fmt.Errorf("modelID %s not found", modelID)
+		return "", fmt.Errorf("modelID %s not found", modelName)
 	}
 }
 
