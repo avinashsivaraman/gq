@@ -91,8 +91,26 @@ func runCommand(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	if provider == "" {
+		provider = viper.GetString("default")
+		if verbose {
+			fmt.Println("\033[33mChatProvider not specified. Using default provider: \033[0m")
+		}
+	} else {
+		if verbose {
+			fmt.Println("\033[33mUsing Chat Provider: \033[0m")
+		}
+	}
+
+	if verbose {
+		fmt.Println("\033[36m" + provider)
+		fmt.Println("\033[0m")
+	}
+
 	result := askQuestion(question, cmdArgs, provider, verbose)
-	write(result, os.Stdout, verbose)
+
+	SKIP_FORMATTING := provider == "bedrock"
+	write(result, os.Stdout, verbose, SKIP_FORMATTING)
 	return nil
 }
 
@@ -120,21 +138,6 @@ func askQuestion(question string, data string, provider string, verbose bool) st
 		fmt.Println("\033[36m" + inputQuestion + "\033[0m")
 	}
 
-	if provider == "" {
-		provider = viper.GetString("default")
-		if verbose {
-			fmt.Println("\033[33mChatProvider not specified. Using default provider: \033[0m")
-		}
-	} else {
-		if verbose {
-			fmt.Println("\033[33mUsing Chat Provider: \033[0m")
-		}
-	}
-
-	if verbose {
-		fmt.Println("\033[36m" + provider)
-		fmt.Println("\033[0m")
-	}
 	chatProvider := getChatProvider(provider)
 
 	answer, err := chatProvider.Chat(inputQuestion, verbose)
@@ -156,23 +159,29 @@ func readFromPipe(reader io.Reader) string {
 	return string(inputBytes)
 }
 
-/**
-* This function writes the result as output
- */
-func write(s string, w io.Writer, verbose bool) error {
+func unquote(s string, skip bool) string {
+	if skip {
+		return s
+	}
 	unquoted, err := strconv.Unquote(`"` + s + `"`)
 	if err != nil {
 		log.Fatal(err)
-		return err
 	}
+	return unquoted
+}
 
+/**
+* This function writes the result as output
+ */
+func write(s string, w io.Writer, verbose bool, skipUnquoted bool) error {
+	unquoted := unquote(s, skipUnquoted)
 	if verbose {
 		fmt.Println("\033[32m---LLM Output---\033[0m")
 	}
 	_, e := fmt.Fprintln(w, unquoted)
 
 	if e != nil {
-		log.Fatal(err)
+		log.Fatal(e)
 		return e
 	}
 	return nil

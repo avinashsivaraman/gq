@@ -172,6 +172,7 @@ type Llama2Request struct {
 	Prompt       string  `json:"prompt"`
 	MaxGenLength int     `json:"max_gen_len,omitempty"`
 	Temperature  float64 `json:"temperature,omitempty"`
+	TopP         float64 `json:"top_p,omitempty"`
 }
 
 type Llama2Response struct {
@@ -187,6 +188,7 @@ func (wrapper InvokeModelWrapper) InvokeLlama2(prompt string) (string, error) {
 		Prompt:       prompt,
 		MaxGenLength: 512,
 		Temperature:  0.5,
+		TopP:         0.9,
 	})
 	if err != nil {
 		log.Fatal("failed to marshal", err)
