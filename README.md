@@ -51,6 +51,10 @@ azureOpenAI:
   modelEndpoint: <ENDPOINT>
   temperature: 0.5
   maxOutputTokens: 1024
+bedrock:
+  modelName: <MODEL_NAME>
+  awsProfile: <AWS_PROFILE> # AWS Profile Name which has access to the model in ~/.aws/credentials
+  awsRegion: <AWS_REGION>
 ```
 
 ## Supported Models
@@ -58,7 +62,14 @@ azureOpenAI:
 - Gemini
 - OpenAI
 - AzureOpenAI
+- Amazon Bedrock Integration
 
 ## Future Plans
 
 - Support for Ollama
+
+## Amazon Bedrock Setup
+
+To setup AWS profile for Amazon Bedrock, follow the steps below: 
+1. AWS Profile: https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html. Profile should have access to invoke the model.
+2. Enable Amazon Bedrock Model: https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html
